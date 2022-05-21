@@ -131,12 +131,12 @@ function note(n) {
   document.getElementById(n).style.backgroundColor = n == cur ? "#080" : "#a00";
   if (!(once && tried.length > 0) || n == cur) {
     total++;
-    document.cookie = "total=" + total + ";";
+    document.cookie = "total=" + total + ";max-age=604800;";
   }
   if (n == cur) {
     cur = null;
     score++;
-    document.cookie = "score=" + score + ";";
+    document.cookie = "score=" + score + ";max-age=604800;";
   }
   tried.push(n);
   document.getElementById("score").innerHTML = score + "/" + total;
@@ -146,8 +146,8 @@ function reset() {
   cur = null;
   score = 0;
   total = 0;
-  document.cookie = "score=0;";
-  document.cookie = "total=0;";
+  document.cookie = "score=0;max-age=604800;";
+  document.cookie = "total=0;max-age=604800;";
   document.getElementById("score").innerHTML = "0/0";
 }
 
@@ -155,7 +155,7 @@ if (!help) document.getElementById("help").checked = true;
 if (!once) document.getElementById("once").checked = true;
 
 (toggleHelp = function() {
-  document.cookie = "help=" + (+ help) + ";";
+  document.cookie = "help=" + (+ help) + ";max-age=604800;";
   for (let e of document.getElementsByTagName("h")) e.style.display = help ? "none" : "";
   for (let e of document.getElementsByClassName("note")) e.style.fontSize = help ? "calc(28px + 0.5vw)" : "";
   help = !help;
@@ -163,7 +163,7 @@ if (!once) document.getElementById("once").checked = true;
 
 (toggleOnce = function() {
   once = !once;
-  document.cookie = "once=" + (+ once) + ";";
+  document.cookie = "once=" + (+ once) + ";max-age=604800;";
 })();
 
 
@@ -180,7 +180,7 @@ window.addEventListener("keydown", (event) => {
 (setTheme = function(newTheme) {
   document.body.classList.remove(theme || null);
   document.body.classList.add(newTheme);
-  document.cookie = "theme=" + newTheme + ";";
+  document.cookie = "theme=" + newTheme + ";max-age=604800;";
   theme = newTheme;
 })(theme);
 
