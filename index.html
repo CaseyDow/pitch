@@ -25,6 +25,13 @@
         </label>
       </div>
       <div class="row">
+        Only Count Once
+        <label class="switch">
+          <input id="once" style="display: none;" type="checkbox" onclick="toggleOnce();">
+          <span class="slider">
+        </label>
+      </div>
+      <div class="row">
         Theme
         <div id="themes">
           <button style="width: 5vw; height: 5vh; margin-right: 1vw; background-color: var(--dark-accent);"></button>
@@ -68,7 +75,7 @@
 
   <div style="display: flex; align-items: center; justify-content: center;">
     <h2 style="display: inline; padding-right: 1vw;">
-      <button style="padding: 2vh 5vw;" onclick="reset()">Reset <h>[Esc]</h></button>
+      <button style="padding: 2vh 5vw;" onclick="reset()">Reset</button>
     </h2>
     <h2 id="score" style="color: #000; display: inline;" />
   </div>
@@ -82,7 +89,8 @@ const keys = ["A", "B", "C", "D", "E", "F", "G"];
 
 let help = (getCookie = function(name) {
   return document.cookie.split(";").find(c => c.trim().indexOf(name + "=") == 0);
-})("help")?.includes("1");
+})("help")?.includes("1") || false;
+let once = !getCookie("once")?.trim().includes("1") || false;
 let theme = getCookie("theme")?.trim().substring(6) || "theme-green";
 let score = parseInt(getCookie("score")?.trim().substring(6)) || 0;
 let total = parseInt(getCookie("total")?.trim().substring(6)) || 0;
@@ -116,17 +124,21 @@ function play() {
 }
 
 function note(n) {
-  if (cur == null || tried.includes(n)) return;
+  if (cur == null || tried.includes(n)) {
+    if (n != cur) sampler.triggerAttackRelease(n + "3", 4);
+    return;
+  }
   document.getElementById(n).style.backgroundColor = n == cur ? "#080" : "#a00";
+  if (!(once && tried.length > 0) || n == cur) {
+    total++;
+    document.cookie = "total=" + total + ";";
+  }
   if (n == cur) {
     cur = null;
     score++;
     document.cookie = "score=" + score + ";";
-  } else {
-    tried.push(n);
   }
-  total++;
-  document.cookie = "total=" + total + ";";
+  tried.push(n);
   document.getElementById("score").innerHTML = score + "/" + total;
 }
 
@@ -140,24 +152,24 @@ function reset() {
 }
 
 if (!help) document.getElementById("help").checked = true;
+if (!once) document.getElementById("once").checked = true;
 
 (toggleHelp = function() {
   document.cookie = "help=" + (+ help) + ";";
-  for (let i = 0; i < document.getElementsByTagName("h").length; i++) {
-    document.getElementsByTagName("h")[i].style.display = help ? "none" : "";
-  }
-  for (let i = 0; i < document.getElementsByClassName("note").length; i++) {
-    document.getElementsByClassName("note")[i].style.fontSize = help ? "calc(28px + 0.5vw)" : "";
-  }
-  help = !help
+  for (let e of document.getElementsByTagName("h")) e.style.display = help ? "none" : "";
+  for (let e of document.getElementsByClassName("note")) e.style.fontSize = help ? "calc(28px + 0.5vw)" : "";
+  help = !help;
+})();
+
+(toggleOnce = function() {
+  once = !once;
+  document.cookie = "once=" + (+ once) + ";";
 })();
 
 
 window.addEventListener("keydown", (event) => {
   if (event.key == " ") {
     play();
-  } else if (event.key == "Escape") {
-    reset();
   } else if (isNaN(event.key)) {
     if (keys.includes(event.key.toUpperCase())) sampler.triggerAttackRelease(event.key + "3", 4);
   } else if (parseInt(event.key) < 8 && parseInt(event.key) > 0) {
