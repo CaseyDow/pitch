@@ -90,14 +90,13 @@ const keys = ["A", "B", "C", "D", "E", "F", "G"];
 let help = (getCookie = function(name) {
   return document.cookie.split(";").find(c => c.trim().indexOf(name + "=") == 0);
 })("help")?.includes("1") || false;
-let once = !getCookie("once")?.trim().includes("1") || false;
+let once = !getCookie("once")?.trim().includes("1") || true;
 let theme = getCookie("theme")?.trim().substring(6) || "theme-green";
 let score = parseInt(getCookie("score")?.trim().substring(6)) || 0;
 let total = parseInt(getCookie("total")?.trim().substring(6)) || 0;
 document.getElementById("score").innerHTML = score + "/" + total;
 
 let tried = [];
-
 let cur;
 let octave;
 
@@ -120,24 +119,24 @@ function play() {
     tried = [];
   }
 
-  sampler.triggerAttackRelease(cur + octave, 4);
+  sampler.triggerAttackRelease(cur + octave, 1);
 }
 
 function note(n) {
   if (cur == null || tried.includes(n)) {
-    if (n != cur) sampler.triggerAttackRelease(n + "3", 4);
+    sampler.triggerAttackRelease(n + "3", 1);
     return;
   }
   document.getElementById(n).style.backgroundColor = n == cur ? "#080" : "#a00";
-  if (!(once && tried.length > 0) || n == cur) {
+  if (!once || tried.length == 0) {
     total++;
     document.cookie = "total=" + total + ";max-age=604800;";
+    if (n == cur) {
+      score++;
+      document.cookie = "score=" + score + ";max-age=604800;";
+    }
   }
-  if (n == cur) {
-    cur = null;
-    score++;
-    document.cookie = "score=" + score + ";max-age=604800;";
-  }
+  if (n == cur) cur = null;
   tried.push(n);
   document.getElementById("score").innerHTML = score + "/" + total;
 }
@@ -168,10 +167,10 @@ if (!once) document.getElementById("once").checked = true;
 
 
 window.addEventListener("keydown", (event) => {
-  if (event.key == " ") {
-    play();
-  } else if (isNaN(event.key)) {
-    if (keys.includes(event.key.toUpperCase())) sampler.triggerAttackRelease(event.key + "3", 4);
+  if (isNaN(parseInt(event.key))) {
+    if (event.key == " ") play();
+    if (event.key == "`") keys.forEach((e) => sampler.triggerAttackRelease(e + "3", 1));
+    if (keys.includes(event.key.toUpperCase())) sampler.triggerAttackRelease(event.key + "3", 1);
   } else if (parseInt(event.key) < 8 && parseInt(event.key) > 0) {
     note(keys[parseInt(event.key) - 1]);
   }
