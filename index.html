@@ -90,7 +90,7 @@ const keys = ["A", "B", "C", "D", "E", "F", "G"];
 let help = (getCookie = function(name) {
   return document.cookie.split(";").find(c => c.trim().indexOf(name + "=") == 0);
 })("help")?.includes("1") || false;
-let once = !getCookie("once")?.trim().includes("1") || true;
+let once = getCookie("once")?.trim().includes("1") || false;
 let theme = getCookie("theme")?.trim().substring(6) || "theme-green";
 let score = parseInt(getCookie("score")?.trim().substring(6)) || 0;
 let total = parseInt(getCookie("total")?.trim().substring(6)) || 0;
@@ -161,8 +161,8 @@ if (!once) document.getElementById("once").checked = true;
 })();
 
 (toggleOnce = function() {
-  once = !once;
   document.cookie = "once=" + (+ once) + ";max-age=604800;";
+  once = !once;
 })();
 
 
